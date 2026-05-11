@@ -9,6 +9,21 @@ import { motion } from 'motion/react';
 function AppContent() {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      setIsLoggingIn(true);
+      setLoginError(null);
+      await signInWithGoogle();
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      setLoginError(error.message || "Failed to sign in. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -19,17 +34,22 @@ function AppContent() {
             <MessageSquare fill="currentColor" />
             <span>VibeChat</span>
           </div>
-          <button 
-            onClick={signInWithGoogle}
-            className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-200 active:scale-95"
-          >
-            Sign In
-          </button>
+          <div className="flex items-center gap-4">
+            {loginError && <span className="text-xs text-red-500 font-medium hidden sm:inline">{loginError}</span>}
+            <button 
+              onClick={handleLogin}
+              disabled={isLoggingIn}
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-200 active:scale-95 disabled:opacity-50"
+            >
+              {isLoggingIn ? 'Connecting...' : 'Sign In'}
+            </button>
+          </div>
         </nav>
 
         {/* Hero Section */}
         <main className="flex-1 flex flex-col lg:flex-row items-center justify-center p-8 lg:p-20 gap-12 max-w-7xl mx-auto w-full">
           <div className="flex-1 space-y-8 text-center lg:text-left">
+            {loginError && <p className="text-sm text-red-500 font-bold sm:hidden bg-red-50 p-3 rounded-lg">{loginError}</p>}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -52,10 +72,11 @@ function AppContent() {
                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4"
             >
               <button 
-                onClick={signInWithGoogle}
-                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-xl hover:shadow-indigo-200 active:scale-95 flex items-center justify-center gap-2"
+                onClick={handleLogin}
+                disabled={isLoggingIn}
+                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-xl hover:shadow-indigo-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Get Started Now <Zap size={20} />
+                {isLoggingIn ? 'Connecting...' : 'Get Started Now'} <Zap size={20} />
               </button>
               <button className="px-8 py-4 bg-white text-gray-600 border-2 border-gray-100 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all">
                 Learn More
