@@ -19,7 +19,11 @@ function AppContent() {
       await signInWithGoogle();
     } catch (error: any) {
       console.error("Login failed:", error);
-      setLoginError(error.message || "Failed to sign in. Please try again.");
+      if (error.code === 'auth/unauthorized-domain') {
+        setLoginError("This domain is not authorized in Firebase. Please add this URL to 'Authorized Domains' in your Firebase Authentication settings.");
+      } else {
+        setLoginError(error.message || "Failed to sign in. Please try again.");
+      }
     } finally {
       setIsLoggingIn(false);
     }
